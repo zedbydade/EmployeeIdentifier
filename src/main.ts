@@ -19,6 +19,7 @@ const main = async (): Promise<void> => {
     })
   );
 
+  // @ts-ignore
   const server: Server = await app.listen((process.env.PORT as any) as number);
   console.log(`Listening on PORT: ${process.env.PORT as any}`);
 };
