@@ -5,10 +5,25 @@ import { NextFunction } from "express";
 
 const EmployeeSchema = new Mongoose.Schema(
   {
+    first_name: {
+      type: String,
+      required: true,
+      select: true
+    },
+    last_name: {
+      type: String,
+      required: true,
+      select: true
+    },
     email: {
       type: String,
       required: true,
       select: true
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false
     },
     age: {
       type: Number,
@@ -30,21 +45,6 @@ const EmployeeSchema = new Mongoose.Schema(
       ref: "Company",
       required: true,
       select: true
-    },
-    first_name: {
-      type: String,
-      required: true,
-      select: true
-    },
-    last_name: {
-      type: String,
-      required: true,
-      select: true
-    },
-    password: {
-      type: String,
-      required: true,
-      select: false
     }
   },
   {
