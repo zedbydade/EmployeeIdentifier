@@ -29,6 +29,7 @@
     "@types/mongoose": "^5.5.11",
     "faker": "^4.1.0",
     "jest": "^24.8.0",
+    "ts-node-dev": "^1.0.0-pre.40",
     "typescript": "^3.5.3"
   }
 }
