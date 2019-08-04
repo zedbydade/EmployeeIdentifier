@@ -18,7 +18,8 @@ const EmployeeSchema = new Mongoose.Schema(
     email: {
       type: String,
       required: true,
-      select: true
+      select: true,
+      unique: true
     },
     password: {
       type: String,
@@ -73,6 +74,7 @@ export interface IEmployee extends Mongoose.Document {
   occupation: string;
   age: number;
   salary: number;
+  employer: Mongoose.Types.ObjectId;
 }
 
 export const Employee: Mongoose.Model<IEmployee> = Mongoose.model<IEmployee>(
