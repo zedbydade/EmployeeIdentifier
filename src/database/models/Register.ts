@@ -1,7 +1,5 @@
 import Mongoose from "../MongoDB";
 
-import { NextFunction } from "express";
-
 const RegisterSchema = new Mongoose.Schema(
   {
     employee: {
@@ -25,15 +23,6 @@ const RegisterSchema = new Mongoose.Schema(
     timestamps: true
   }
 );
-
-async function populate(this: any, next: NextFunction): Promise<void> {
-  await this.populate("employee");
-  next();
-}
-
-RegisterSchema.pre("find", populate);
-RegisterSchema.pre("findOne", populate);
-RegisterSchema.pre("findById", populate);
 
 export interface IRegister extends Mongoose.Document {
   employee: Mongoose.Types.ObjectId;
