@@ -25,6 +25,6 @@ export interface ICompany extends Mongoose.Document {
 }
 
 export const Company: Mongoose.Model<ICompany> = Mongoose.model<ICompany>(
-  "Register",
+  "Company",
   CompanySchema
 );
