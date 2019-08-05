@@ -3,10 +3,13 @@ import { Request, Response } from "express";
 import { Employee, IEmployee } from "../../../database/models/Employee";
 
 import * as yup from "yup";
-import {
-  IFormattedYupError,
-  format_yup_error
-} from "../../../utils/FormatYupError";
+
+import { compare } from "bcrypt";
+
+import { sign } from "jsonwebtoken";
+
+import { IFormattedYupError } from "../../../utils/FormatYupError";
+import { validate } from "../../../utils/YupValidate";
 
 import { ICompany, Company } from "../../../database/models/Company";
 
@@ -52,18 +55,6 @@ const RegisterSchema = yup.object().shape({
   employer: yup.string().required()
 });
 
-const validate = async (
-  employee: IEmployee
-): Promise<Array<IFormattedYupError>> => {
-  try {
-    console.log(employee);
-    await RegisterSchema.validate(employee, { abortEarly: false });
-    return [];
-  } catch (ex) {
-    return format_yup_error(ex);
-  }
-};
-
 export class EmployeeController {
   public static search = async (
     request: Request,
@@ -73,10 +64,24 @@ export class EmployeeController {
       const { page = 0 } = request.query;
       const { name } = request.params;
 
-      const employees = await Employee.find("first_name", {
-        $regex: new RegExp(name),
-        $options: "i"
-      })
+      const regex: RegExp = new RegExp(name);
+
+      const employees: Array<IEmployee> = await Employee.find()
+        .or([
+          {
+            first_name: {
+              $regex: regex,
+              $options: "i"
+            }
+          },
+          {
+            last_name: {
+              $regex: regex,
+              $options: "i"
+            }
+          }
+        ])
+        .populate("employer")
         .skip(page * 20)
         .limit(20);
 
@@ -87,10 +92,8 @@ export class EmployeeController {
     }
   };
 
-  public static index = async (
-    request: Request,
-    response: Response
-  ): Promise<Response> => response.json(await Employee.find({}));
+  public static index = async (_: any, response: Response): Promise<Response> =>
+    response.json(await Employee.find({}).populate("employer"));
 
   public static get = async (
     request: Request,
@@ -98,7 +101,10 @@ export class EmployeeController {
   ): Promise<Response> => {
     try {
       const { _id } = request.params;
-      return response.status(200).json(await Employee.findOne({ _id }));
+
+      return response
+        .status(200)
+        .json(await Employee.findOne({ _id }).populate("employer"));
     } catch (ex) {
       console.error(ex);
       return response.status(404).json({ message: "employee not found" });
@@ -110,9 +116,10 @@ export class EmployeeController {
     response: Response
   ): Promise<Response> => {
     try {
-      console.log("body", request.body);
-
-      const errors: Array<IFormattedYupError> = await validate(request.body);
+      const errors: Array<IFormattedYupError> = await validate(
+        request.body,
+        RegisterSchema
+      );
 
       if (errors.length > 0) return response.status(422).json(errors);
 
@@ -128,9 +135,9 @@ export class EmployeeController {
       request.body.employer = employer._id;
 
       const employee: IEmployee = await Employee.create(request.body);
-      delete employee.password;
+      employee.password = "";
 
-      return response.status(201).json(await Employee.create(employee));
+      return response.status(201).json(employee);
     } catch (ex) {
       console.error(ex);
       return response
@@ -143,7 +150,33 @@ export class EmployeeController {
     request: Request,
     response: Response
   ): Promise<Response> => {
-    return response.send();
+    try {
+      const { email, password } = request.body;
+
+      const employee: Maybe<IEmployee> = await Employee.findOne({
+        email
+      }).select("+password");
+
+      if (!employee)
+        return response
+          .status(401)
+          .json({ message: "invalid email or password" });
+
+      if (!(await compare(password, employee.password)))
+        return response
+          .status(401)
+          .send({ message: "invalid email or password" });
+
+      delete employee.password;
+
+      const token = sign({ id: employee._id }, process.env
+        .JWT_SECRET as string);
+
+      return response.status(200).json({ employee, token });
+    } catch (ex) {
+      console.error(ex);
+      return response.status(401).json({ message: "failed to login" });
+    }
   };
 
   public static patch = async (

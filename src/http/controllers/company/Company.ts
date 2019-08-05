@@ -96,35 +96,4 @@ export class CompanyController {
       return response.status(404).json({ message: "no results found" });
     }
   };
-
-  public static patch = async (
-    request: Request,
-    response: Response
-  ): Promise<Response> => {
-    try {
-      const { _id } = request.params;
-      return response
-        .status(200)
-        .json(
-          await Company.findOneAndUpdate({ _id }, request.body, { new: true })
-        );
-    } catch (ex) {
-      console.error(ex);
-      return response.status(422).json({ message: "failed to update company" });
-    }
-  };
-
-  public static delete = async (
-    request: Request,
-    response: Response
-  ): Promise<Response> => {
-    try {
-      const { _id } = request.params;
-
-      return response.status(200).json(await Company.findOneAndDelete({ _id }));
-    } catch (ex) {
-      console.error(ex);
-      return response.status(500).json({ message: "failed to delete company" });
-    }
-  };
 }

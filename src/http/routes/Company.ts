@@ -7,5 +7,3 @@ router.get("/company", CompanyController.index);
 router.get("/company/:_id", CompanyController.get);
 router.get("/company/search/:name", CompanyController.search);
 router.post("/company/register", CompanyController.register);
-router.patch("/company/:_id", CompanyController.patch);
-router.delete("/company/:_id", CompanyController.patch);
