@@ -1,6 +1,6 @@
 # Identificador De Funcionarios feito para o estudo de ioT e Web. 
 
-### Funcionalidades
+### Objetivos
 - [X] Definição de quais dados vão ser gerados. 
 - [X] Criação de uma tabela para dia/horario da entrada do funcionario. 
 - [ ] criação do sistema de login.
