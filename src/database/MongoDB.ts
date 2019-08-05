@@ -1,5 +1,6 @@
 import Mongoose from "mongoose";
 
+Mongoose.set("useFindAndModify", false);
 Mongoose.set("useCreateIndex", true);
 
 Mongoose.connect(
