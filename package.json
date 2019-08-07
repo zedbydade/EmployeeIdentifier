@@ -4,8 +4,8 @@
   "description": "",
   "main": "build/main.js",
   "scripts": {
-    "test": "jest --watch",
-    "dev": "ts-node-dev --inspect -- src/main.ts"
+    "test": "cls && jest --watch",
+    "dev": "cls && ts-node-dev --inspect -- src/main.ts"
   },
   "jest": {
     "transform": {
