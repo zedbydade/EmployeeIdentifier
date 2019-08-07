@@ -7,10 +7,10 @@ export const random_register = (type: string): any => ({
   type
 });
 
-describe.only("register test suite", () => {
+describe("register test suite", () => {
   test("create a register", async () => {});
 
-  test.only("list all registers", async () => {
+  test("list all registers", async () => {
     const { data } = await axios.get(`${TestingEndpoint}/register`);
 
     expect(data.length).toBeGreaterThan(0);
