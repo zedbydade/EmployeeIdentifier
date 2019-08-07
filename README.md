@@ -20,5 +20,5 @@ Somos membros da comunidade He4rt Developers, que tem como objetivo disponibiliz
 </h3>
 
 ## Licença [MIT](https://github.com/Logikoz/BukkitDev-System/blob/master/LICENSE)
-O programa é gratuito e pode ser editado, compartilhado, e pode ser usado de forma comercial.
+O projeto é gratuito e pode ser editado, compartilhado, e pode ser usado de forma comercial.
 <br>
