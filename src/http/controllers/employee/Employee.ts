@@ -11,11 +11,11 @@ import { sign } from "jsonwebtoken";
 import { IFormattedYupError } from "../../../utils/FormatYupError";
 import { validate } from "../../../utils/YupValidate";
 
-import { ICompany, Company } from "../../../database/models/Company";
-
 import { Maybe } from "../../../types/Maybe";
+import { Company } from "../../../database/models/Company";
 
 const RegisterSchema = yup.object().shape({
+  card_id: yup.string().required(),
   first_name: yup
     .string()
     .min(5, "First name must be at least 5 characters long")
@@ -51,8 +51,7 @@ const RegisterSchema = yup.object().shape({
     .string()
     .min(3, "Employee must have an occupation")
     .max(255, "Ocuppation can't be longer than 255 characters")
-    .required(),
-  employer: yup.string().required()
+    .required()
 });
 
 export class EmployeeController {
@@ -102,9 +101,11 @@ export class EmployeeController {
     try {
       const { _id } = request.params;
 
-      return response
-        .status(200)
-        .json(await Employee.findOne({ _id }).populate("employer"));
+      const employee = await Employee.findOne({ _id }, Company).populate(
+        "employer"
+      );
+
+      return response.status(200).json(employee);
     } catch (ex) {
       console.error(ex);
       return response.status(404).json({ message: "employee not found" });
@@ -123,21 +124,28 @@ export class EmployeeController {
 
       if (errors.length > 0) return response.status(422).json(errors);
 
-      const employer: Maybe<ICompany> = await Company.findOne({
-        name: request.body.employer
-      });
-
-      if (!employer)
+      if (await Employee.findOne({ card_id: request.body.card_id }))
         return response
           .status(422)
-          .json({ message: "employer not found, make sure it's registered" });
+          .json({ message: "employee is already registered" });
 
-      request.body.employer = employer._id;
+      if (await Employee.findOne({ email: request.body.email }))
+        return response
+          .status(422)
+          .json({ message: "email is already in use" });
 
       const employee: IEmployee = await Employee.create(request.body);
       employee.password = "";
 
-      return response.status(201).json(employee);
+      employee.password = "";
+
+      const token = sign(
+        { _id: employee._id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: "10h" }
+      );
+
+      return response.status(201).json({ employee, token });
     } catch (ex) {
       console.error(ex);
       return response
@@ -167,10 +175,13 @@ export class EmployeeController {
           .status(401)
           .send({ message: "invalid email or password" });
 
-      delete employee.password;
+      employee.password = "";
 
-      const token = sign({ id: employee._id }, process.env
-        .JWT_SECRET as string);
+      const token = sign(
+        { _id: employee._id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: "10h" }
+      );
 
       return response.status(200).json({ employee, token });
     } catch (ex) {
@@ -183,13 +194,37 @@ export class EmployeeController {
     request: Request,
     response: Response
   ): Promise<Response> => {
-    return response.send();
+    try {
+      const { _id } = (request as any).token_payload;
+      if (!_id)
+        return response.status(400).json({ message: "token is required" });
+
+      const { payload } = request.body;
+
+      return response
+        .status(200)
+        .json(await Employee.findOneAndUpdate({ _id }, payload, { new: true }));
+    } catch (ex) {
+      console.error(ex);
+      return response.status(422).json({ message: "couldn't update employee" });
+    }
   };
 
   public static delete = async (
     request: Request,
     response: Response
   ): Promise<Response> => {
-    return response.send();
+    try {
+      const { _id } = (request as any).token_payload;
+      if (!_id)
+        return response.status(400).json({ message: "token is required" });
+
+      await Employee.findOneAndDelete({ _id });
+
+      return response.status(200).json({ message: "employee deleted" });
+    } catch (ex) {
+      console.error(ex);
+      return response.status(400).json({ message: "couldn't delete user", ex });
+    }
   };
 }
