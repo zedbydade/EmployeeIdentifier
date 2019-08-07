@@ -2,6 +2,13 @@ import Mongoose from "../MongoDB";
 
 const CompanySchema = new Mongoose.Schema(
   {
+    administrators: [
+      {
+        type: Mongoose.Schema.Types.ObjectId,
+        required: false,
+        select: true
+      }
+    ],
     name: {
       type: String,
       required: true,
@@ -20,6 +27,7 @@ const CompanySchema = new Mongoose.Schema(
 );
 
 export interface ICompany extends Mongoose.Document {
+  administrators: Mongoose.Types.ObjectId[];
   name: string;
   area: string;
 }
