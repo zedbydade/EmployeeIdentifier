@@ -5,6 +5,11 @@ import { NextFunction } from "express";
 
 const EmployeeSchema = new Mongoose.Schema(
   {
+    card_id: {
+      type: String,
+      required: true,
+      select: false
+    },
     first_name: {
       type: String,
       required: true,
@@ -44,7 +49,7 @@ const EmployeeSchema = new Mongoose.Schema(
     employer: {
       type: Mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      required: true,
+      required: false,
       select: true
     }
   },
@@ -59,14 +64,14 @@ EmployeeSchema.pre("save", async function(
 ): Promise<void> {
   const password: string = this.get("password");
 
-  if (password && this.isModified("password")) {
+  if (password && this.isModified("password"))
     this.set("password", await hash(password, 10));
-  }
 
   next();
 });
 
 export interface IEmployee extends Mongoose.Document {
+  card_id: string;
   email: string;
   first_name: string;
   last_name: string;
