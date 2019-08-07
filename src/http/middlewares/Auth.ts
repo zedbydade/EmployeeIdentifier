@@ -11,6 +11,7 @@ export const TokenValidator = async (
     const [_, token] = request.headers.authorization.split(" ");
     request.token_payload = await jwt.verify(token, process.env
       .JWT_SECRET as string);
+
     next();
   } catch (ex) {
     return response.status(401).json({ message: "unauthorized" });
