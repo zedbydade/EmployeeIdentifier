@@ -1,4 +1,4 @@
-# Identificador De Funcionarios feito para o estudo de ioT e Web. 
+# Identificador de funcionarios para o estudo de IoT e Web. 
 
 ### Objetivos
 - [X] Definição de quais dados vão ser gerados. 
